@@ -9,10 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
-// import jakarta.servlet.ServletException;
-// import jakarta.servlet.http.HttpServletResponse;
 
-// import java.io.IOException;
 import java.util.List;
 
 @Controller
@@ -35,7 +32,7 @@ public class EmpleadoController {
       case "inicio":
         return "redirect:/index";
       default:
-        return "views/Error"; // Agrega una vista de error por si la opción no coincide
+        return "views/Error";
     }
   }
 
@@ -59,15 +56,15 @@ public class EmpleadoController {
 
   private String mostrarEmpleados(Model model) {
     try {
-        List<Empleado> empleados = empleadoDAO.obtenerEmpleados();
-        model.addAttribute("empleados", empleados);
+      List<Empleado> empleados = empleadoDAO.obtenerEmpleados();
+      model.addAttribute("empleados", empleados);
     } catch (DatosNoCorrectosException e) {
-        e.printStackTrace();
+      e.printStackTrace();
     }
     return "views/MostrarEmpleados";
-}
+  }
 
-private String mostrarEmpleadosFiltrados(HttpServletRequest request, Model model) {
+  private String mostrarEmpleadosFiltrados(HttpServletRequest request, Model model) {
     String dni = request.getParameter("dni");
     String nombre = request.getParameter("nombre");
     String sexo = request.getParameter("sexo");
@@ -75,34 +72,38 @@ private String mostrarEmpleadosFiltrados(HttpServletRequest request, Model model
     Integer antiguedad = parseIntOrNull(request.getParameter("anyos"));
 
     try {
-        List<Empleado> empleados = empleadoDAO.obtenerEmpleadosFiltrados(nombre, dni, sexo, categoria, antiguedad);
-        model.addAttribute("empleados", empleados);
+      List<Empleado> empleados = empleadoDAO.obtenerEmpleadosFiltrados(nombre, dni, sexo, categoria, antiguedad);
+      model.addAttribute("empleados", empleados);
+      System.out.println("DNI recibido para buscar: " + dni);
+      System.out.println("Empleados encontrados: " + empleados.size()); // Nuevo log para verificar la cantidad
+
     } catch (DatosNoCorrectosException e) {
-        e.printStackTrace();
+      e.printStackTrace();
+      System.out.println("no se filtró porque no entro en la DB");
     }
     return "views/MostrarEmpleados";
-}
+  }
 
-private String mostrarSalario(HttpServletRequest request, Model model) {
+  private String mostrarSalario(HttpServletRequest request, Model model) {
     String dni = request.getParameter("dni");
     double salario = empleadoDAO.obtenerSalario(dni);
     model.addAttribute("salario", salario);
     model.addAttribute("dni", dni);
     return "views/MostrarSalario";
-}
+  }
 
-private String modificarEmpleado(HttpServletRequest request, Model model) {
+  private String modificarEmpleado(HttpServletRequest request, Model model) {
     String dni = request.getParameter("dni");
     try {
-        Empleado empleado = empleadoDAO.obtenerEmpleado(dni);
-        model.addAttribute("empleado", empleado);
+      Empleado empleado = empleadoDAO.obtenerEmpleado(dni);
+      model.addAttribute("empleado", empleado);
     } catch (DatosNoCorrectosException e) {
-        e.printStackTrace();
+      e.printStackTrace();
     }
     return "views/ModificarEmpleado";
-}
+  }
 
-private String enviarCambios(HttpServletRequest request, Model model) {
+  private String enviarCambios(HttpServletRequest request, Model model) {
     String dni = request.getParameter("dni");
     String nombre = request.getParameter("nombre");
     String sexo = request.getParameter("sexo");
@@ -110,23 +111,23 @@ private String enviarCambios(HttpServletRequest request, Model model) {
     Integer antiguedad = Integer.parseInt(request.getParameter("anyos"));
 
     try {
-        if (empleadoDAO.actualizarEmpleado(dni, nombre, sexo, categoria, antiguedad)) {
-            return "redirect:/empresa?opcion=mostrarEmpleados";
-        } else {
-            model.addAttribute("mensaje", "Datos no soportados");
-            return "views/Error";
-        }
-    } catch (DatosNoCorrectosException e) {
-        e.printStackTrace();
+      if (empleadoDAO.actualizarEmpleado(dni, nombre, sexo, categoria, antiguedad)) {
+        return "redirect:/empresa?opcion=mostrarEmpleados";
+      } else {
+        model.addAttribute("mensaje", "Datos no soportados");
         return "views/Error";
+      }
+    } catch (DatosNoCorrectosException e) {
+      e.printStackTrace();
+      return "views/Error";
     }
-}
+  }
 
-private Integer parseIntOrNull(String str) {
+  private Integer parseIntOrNull(String str) {
     if (str != null && !str.isEmpty()) {
-        return Integer.parseInt(str);
+      return Integer.parseInt(str);
     }
     return null;
-}
+  }
 
 }

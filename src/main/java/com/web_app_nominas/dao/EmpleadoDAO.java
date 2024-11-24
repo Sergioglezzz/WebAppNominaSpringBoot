@@ -41,10 +41,9 @@ public class EmpleadoDAO {
     }
 
     // Método para obtener empleados filtrados
-    public List<Empleado> obtenerEmpleadosFiltrados(String dni, String nombre, String sexo, Integer categoria,
-            Integer anyos) throws DatosNoCorrectosException {
+    public List<Empleado> obtenerEmpleadosFiltrados(String dni, String nombre, String sexo, int categoria, int anyos) throws DatosNoCorrectosException {
         StringBuilder sql = new StringBuilder("SELECT dni, nombre, sexo, categoria, anyos FROM empleados WHERE 1=1");
-
+    
         if (dni != null && !dni.isEmpty()) {
             sql.append(" AND dni LIKE ? ");
         }
@@ -54,13 +53,13 @@ public class EmpleadoDAO {
         if (sexo != null && !sexo.isEmpty()) {
             sql.append(" AND sexo = ? ");
         }
-        if (categoria != null) {
+        if (categoria >= 0) {
             sql.append(" AND categoria = ? ");
         }
-        if (anyos != null) {
+        if (anyos >= 0) {
             sql.append(" AND anyos = ? ");
         }
-
+    
         return jdbcTemplate.query(sql.toString(), preparedStatement -> {
             int index = 1;
             if (dni != null && !dni.isEmpty()) {
@@ -72,14 +71,16 @@ public class EmpleadoDAO {
             if (sexo != null && !sexo.isEmpty()) {
                 preparedStatement.setString(index++, sexo);
             }
-            if (categoria != null) {
+            if (categoria >= 0) {
                 preparedStatement.setInt(index++, categoria);
             }
-            if (anyos != null) {
+            if (anyos >= 0) {
                 preparedStatement.setInt(index++, anyos);
             }
         }, empleadoRowMapper);
     }
+    
+
 
     // Método para obtener un empleado por DNI
     @SuppressWarnings("deprecation")
